@@ -1,0 +1,349 @@
+filepath2010 = "/data/weather/2010"
+filepath2011 = "/data/weather/2011"
+filepath2012 = "/data/weather/2012"
+filepath2013 = "/data/weather/2013"
+filepath2014 = "/data/weather/2014"
+
+TextData2010 = spark.read.format("csv").option("header", "true").option("delimiter", "\t").load(filepath2010)
+TextData2011 = spark.read.format("csv").option("header", "true").option("delimiter", "\t").load(filepath2011)
+TextData2012 = spark.read.format("csv").option("header", "true").option("delimiter", "\t").load(filepath2012)
+TextData2013 = spark.read.format("csv").option("header", "true").option("delimiter", "\t").load(filepath2013)
+TextData2014 = spark.read.format("csv").option("header", "true").option("delimiter", "\t").load(filepath2014)
+
+def Columndrop(k):
+    columns = k.split(" ")
+    result = columns[0] + " " + columns[2] + " " + columns[3] + " " + columns[5] + " " + columns[7] + " " + columns[
+        9] + " " + columns[11] + " " + columns[13] + " " + columns[15] + " " + columns[16] + " " + columns[17] + " " + \
+             columns[18] + " " + columns[19] + " " + columns[20] + " " + columns[21]
+    return result
+
+def DataCleaningProc(k,fname):
+    from pyspark.sql.functions import col, split
+    rdd01 = k.rdd
+    rdd02 = rdd01.map(lambda k: str(k).split('=')[1])
+    rdd03 = rdd02.map(lambda k: ' '.join(k.split()))
+    rdd04 = rdd03.map(lambda k: k[1:-2])
+    rdd05 = rdd04.map(lambda k: k.replace("'", ""))
+    rdd06 = rdd05.map(Columndrop)
+    filespath = "/user/badarlma/"+fname
+    rdd06.saveAsTextFile(filespath)
+    newfileData = spark.read.csv(filespath , header=False, sep=' ')
+    cleanedTableData1 = newfileData.withColumnRenamed('_c0', 'STN').withColumnRenamed('_c1', 'YEARMODA').withColumnRenamed('_c2', 'TEMP').withColumnRenamed('_c3', 'DEWP').withColumnRenamed('_c4', 'SLP').withColumnRenamed('_c5', 'STP').withColumnRenamed('_c6', 'VISIB').withColumnRenamed('_c7', 'WDSP').withColumnRenamed('_c8', 'MXSPD').withColumnRenamed('_c9', 'GUST').withColumnRenamed('_c10', 'MAX').withColumnRenamed('_c11', 'MIN').withColumnRenamed('_c12', 'PRCP').withColumnRenamed('_c13', 'SNDP').withColumnRenamed('_c14', 'FRSHTT')
+	cleanedTableData2 = cleanedTableData1.withColumn("MIN", split(col("MIN"), "\\*").getItem(0))
+	cleanedTableData3 = cleanedTableData2.withColumn("MAX", split(col("MAX"), "\\*").getItem(0))
+	cleanedTableData3 = cleanedTableData3.withColumn("MAX_NEW", cleanData3["MAX"].cast("double"))
+	cleanedTableData3 = cleanedTableData3.withColumn("MIN_NEW", cleanData3["MIN"].cast("double"))
+	cleanedTableData3 = cleanedTableData3.drop('MAX', 'MIN')
+	cleanedTableData3 = cleanedTableData3.withColumnRenamed("MAX_NEW", "MAX")
+	cleanedTableData3 = cleanedTableData3.withColumnRenamed("MIN_NEW", "MIN")
+	cleanedTableData4 = cleanedTableData3.filter(cleanedTableData3.MAX <> 9999.9)
+	cleanedTableData4 = cleanedTableData4.filter(cleanedTableData4.MIN <> 9999.9)
+	return cleanedTableData4
+	
+TextData2010_2014 = TextData2010.union(TextData2011).union(TextData2012).union(TextData2013).union(TextData2014).distinct()
+cleanedData1 = DataCleaningProc(TextData2010_2014,"filepath2010_2014")
+cleanedData1.write.csv("/user/badarlma/cleanedData1")
+
+
+
+
+
+
+
+filepath2015 = "/data/weather/2015"
+filepath2016 = "/data/weather/2016"
+filepath2017 = "/data/weather/2017"
+filepath2018 = "/data/weather/2018"
+filepath2019 = "/data/weather/2019"
+
+TextData2015 = spark.read.format("csv").option("header", "true").option("delimiter", "\t").load(filepath2015)
+TextData2016 = spark.read.format("csv").option("header", "true").option("delimiter", "\t").load(filepath2016)
+TextData2017 = spark.read.format("csv").option("header", "true").option("delimiter", "\t").load(filepath2017)
+TextData2018 = spark.read.format("csv").option("header", "true").option("delimiter", "\t").load(filepath2018)
+TextData2019 = spark.read.format("csv").option("header", "true").option("delimiter", "\t").load(filepath2019)
+
+def Columndrop(k):
+    columns = k.split(" ")
+    result = columns[0] + " " + columns[2] + " " + columns[3] + " " + columns[5] + " " + columns[7] + " " + columns[
+        9] + " " + columns[11] + " " + columns[13] + " " + columns[15] + " " + columns[16] + " " + columns[17] + " " + \
+             columns[18] + " " + columns[19] + " " + columns[20] + " " + columns[21]
+    return result
+
+def DataCleaningProc(k,fname):
+    from pyspark.sql.functions import col, split
+    rdd01 = k.rdd
+    rdd02 = rdd01.map(lambda k: str(k).split('=')[1])
+    rdd03 = rdd02.map(lambda k: ' '.join(k.split()))
+    rdd04 = rdd03.map(lambda k: k[1:-2])
+    rdd05 = rdd04.map(lambda k: k.replace("'", ""))
+    rdd06 = rdd05.map(Columndrop)
+    filespath = "/user/badarlma/"+fname
+    rdd06.saveAsTextFile(filespath)
+    newfileData = spark.read.csv(filespath , header=False, sep=' ')
+    cleanedTableData1 = newfileData.withColumnRenamed('_c0', 'STN').withColumnRenamed('_c1', 'YEARMODA') \
+        .withColumnRenamed('_c2', 'TEMP').withColumnRenamed('_c3', 'DEWP') \
+        .withColumnRenamed('_c4', 'SLP').withColumnRenamed('_c5', 'STP') \
+        .withColumnRenamed('_c6', 'VISIB').withColumnRenamed('_c7', 'WDSP') \
+        .withColumnRenamed('_c8', 'MXSPD').withColumnRenamed('_c9', 'GUST') \
+        .withColumnRenamed('_c10', 'MAX').withColumnRenamed('_c11', 'MIN') \
+        .withColumnRenamed('_c12', 'PRCP').withColumnRenamed('_c13', 'SNDP') \
+        .withColumnRenamed('_c14', 'FRSHTT')
+    cleanedTableData2 = cleanedTableData1.withColumn("MIN", split(col("MIN"), "\\*").getItem(0))
+    cleanedTableData3 = cleanedTableData2.withColumn("MAX", split(col("MAX"), "\\*").getItem(0))
+    cleanedTableData3 = cleanedTableData3.withColumn("MAX_NEW", cleanedTableData3["MAX"].cast("double"))
+    cleanedTableData3 = cleanedTableData3.withColumn("MIN_NEW", cleanedTableData3["MIN"].cast("double"))
+    cleanedTableData3 = cleanedTableData3.drop('MAX', 'MIN')
+    cleanedTableData3 = cleanedTableData3.withColumnRenamed("MAX_NEW", "MAX")
+    cleanedTableData3 = cleanedTableData3.withColumnRenamed("MIN_NEW", "MIN")
+    cleanedTableData4 = cleanedTableData3.filter(cleanedTableData3.TEMP <> 9999.9)
+    cleanedTableData4 = cleanedTableData4.filter(cleanedTableData4.MAX <> 9999.9)
+    cleanedTableData4 = cleanedTableData4.filter(cleanedTableData4.MIN <> 9999.9)
+    return cleanedTableData4
+	
+TextData2015_2019 = TextData2015.union(TextData2016).union(TextData2017).union(TextData2018).union(TextData2019).distinct()
+cleanedData2 = DataCleaningProc(TextData2015_2019,"filepath2015_2019")
+cleanedData2.write.csv("/user/badarlma/cleanedData2")
+
+
+filepath1014 = "/user/badarlma/cleanedData1"
+filepath1519 = "/user/badarlma/cleanedData2"
+Data1 = spark.read.csv(filepath1014)
+Data2 = spark.read.csv(filepath1519)
+finalData = Data1.union(Data2).distinct()
+cleanDataLast = finalData.withColumnRenamed('_c0', 'STN').withColumnRenamed('_c1', 'YEARMODA').withColumnRenamed('_c2', 'TEMP').withColumnRenamed('_c3', 'DEWP').withColumnRenamed('_c4', 'SLP').withColumnRenamed('_c5', 'STP').withColumnRenamed('_c6', 'VISIB').withColumnRenamed('_c7', 'WDSP').withColumnRenamed('_c8', 'MXSPD').withColumnRenamed('_c9', 'GUST').withColumnRenamed('_c10', 'PRCP').withColumnRenamed('_c11', 'SNDP').withColumnRenamed('_c12', 'FRSHTT').withColumnRenamed('_c13', 'MAX').withColumnRenamed('_c14', 'MIN')
+cleanDataLast.createOrReplaceTempView("finalTable")
+cleanDataLast = cleanDataLast.withColumn("MAX_NEW", cleanDataLast["MAX"].cast("double"))
+cleanDataLast = cleanDataLast.withColumn("MIN_NEW", cleanDataLast["MIN"].cast("double"))
+cleanDataLast = cleanDataLast.drop('MAX', 'MIN')
+cleanDataLast = cleanDataLast.withColumnRenamed("MAX_NEW", "MAX")
+cleanDataLast = cleanDataLast.withColumnRenamed("MIN_NEW", "MIN")
+cleanDataLast.createOrReplaceTempView("finalTable")
+>>> myResult = spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MAX from finalTable where Max in (Select MAX(MAX) from finalTable where Max <>9999.9 and LEFT(YEARMODA,4)='2010') and LEFT(YEARMODA,4) ='2010' ").show()
+Hive Session ID = 5e1db4ef-0146-4285-9534-99102ff71349
+20/04/13 13:22:17 ERROR JniBasedUnixGroupsMapping: error looking up the name of group 1013506318: No such file or directory
++------+----+-----+----+-----+
+|   STN|YEAR|MONTH|DATE|  MAX|
++------+----+-----+----+-----+
+|720667|2010|   09|  23|132.8|
++------+----+-----+----+-----+
+pyspark.sql.utils.AnalysisException: u'Table or view not found: cleanDataLast; line 1 pos 120'
+>>> myResult = spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MAX from finalTable where Max in (Select MAX(MAX) from finalTable where Max <>9999.9 and LEFT(YEARMODA,4)='2010') and LEFT(YEARMODA,4) ='2010' ").show()
++------+----+-----+----+-----+
+|   STN|YEAR|MONTH|DATE|  MAX|
++------+----+-----+----+-----+
+|720667|2010|   09|  23|132.8|
++------+----+-----+----+-----+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MAX from finalTable where Max in (Select MAX(MAX) from finalTable where Max <>9999.9 and LEFT(YEARMODA,4)='2011') and LEFT(YEARMODA,4) ='2011' ").show()
++------+----+-----+----+-----+
+|   STN|YEAR|MONTH|DATE|  MAX|
++------+----+-----+----+-----+
+|406355|2011|   08|  03|127.4|
++------+----+-----+----+-----+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MAX from finalTable where Max in (Select MAX(MAX) from finalTable where Max <>9999.9 and LEFT(YEARMODA,4)='2012') and LEFT(YEARMODA,4) ='2012' ").show()
++------+----+-----+----+-----+
+|   STN|YEAR|MONTH|DATE|  MAX|
++------+----+-----+----+-----+
+|722577|2012|   07|  12|132.8|
++------+----+-----+----+-----+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MAX from finalTable where Max in (Select MAX(MAX) from finalTable where Max <>9999.9 and LEFT(YEARMODA,4)='2013') and LEFT(YEARMODA,4) ='2013' ").show()
++------+----+-----+----+-----+
+|   STN|YEAR|MONTH|DATE|  MAX|
++------+----+-----+----+-----+
+|406890|2013|   07|  12|132.8|
++------+----+-----+----+-----+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MAX from finalTable where Max in (Select MAX(MAX) from finalTable where Max <>9999.9 and LEFT(YEARMODA,4)='2014') and LEFT(YEARMODA,4) ='2014' ").show()
++------+----+-----+----+-----+
+|   STN|YEAR|MONTH|DATE|  MAX|
++------+----+-----+----+-----+
+|406650|2014|   08|  03|129.6|
++------+----+-----+----+-----+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MAX from finalTable where Max in (Select MAX(MAX) from finalTable where Max <>9999.9 and LEFT(YEARMODA,4)='2015') and LEFT(YEARMODA,4) ='2015' ").show()
++------+----+-----+----+-----+
+|   STN|YEAR|MONTH|DATE|  MAX|
++------+----+-----+----+-----+
+|916700|2015|   10|  21|132.4|
++------+----+-----+----+-----+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MAX from finalTable where Max in (Select MAX(MAX) from finalTable where Max <>9999.9 and LEFT(YEARMODA,4)='2016') and LEFT(YEARMODA,4) ='2016' ").show()
++------+----+-----+----+-----+
+|   STN|YEAR|MONTH|DATE|  MAX|
++------+----+-----+----+-----+
+|700638|2016|   06|  22|129.0|
++------+----+-----+----+-----+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MAX from finalTable where Max in (Select MAX(MAX) from finalTable where Max <>9999.9 and LEFT(YEARMODA,4)='2017') and LEFT(YEARMODA,4) ='2017' ").show()
++------+----+-----+----+-----+
+|   STN|YEAR|MONTH|DATE|  MAX|
++------+----+-----+----+-----+
+|917430|2017|   04|  10|129.6|
++------+----+-----+----+-----+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MAX from finalTable where Max in (Select MAX(MAX) from finalTable where Max <>9999.9 and LEFT(YEARMODA,4)='2018') and LEFT(YEARMODA,4) ='2018' ").show()
++------+----+-----+----+-----+
+|   STN|YEAR|MONTH|DATE|  MAX|
++------+----+-----+----+-----+
+|408110|2018|   07|  02|126.3|
++------+----+-----+----+-----+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MAX from finalTable where Max in (Select MAX(MAX) from finalTable where Max <>9999.9 and LEFT(YEARMODA,4)='2019') and LEFT(YEARMODA,4) ='2019' ").show()
++------+----+-----+----+-----+
+|   STN|YEAR|MONTH|DATE|  MAX|
++------+----+-----+----+-----+
+|956660|2019|   01|  24|121.1|
++------+----+-----+----+-----+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MIN from finalTable where Min in (Select MIN(MIN) from finalTable where Min <>9999.9 and LEFT(YEARMODA,4)='2010') and LEFT(YEARMODA,4) ='2010' ").show()
++------+----+-----+----+------+
+|   STN|YEAR|MONTH|DATE|   MIN|
++------+----+-----+----+------+
+|896060|2010|   08|  02|-115.2|
++------+----+-----+----+------+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MIN from finalTable where Min in (Select MIN(MIN) from finalTable where Min <>9999.9 and LEFT(YEARMODA,4)='2011') and LEFT(YEARMODA,4) ='2011' ").show()
++------+----+-----+----+------+
+|   STN|YEAR|MONTH|DATE|   MIN|
++------+----+-----+----+------+
+|897340|2011|   09|  17|-111.8|
++------+----+-----+----+------+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MIN from finalTable where Min in (Select MIN(MIN) from finalTable where Min <>9999.9 and LEFT(YEARMODA,4)='2012') and LEFT(YEARMODA,4) ='2012' ").show()
++------+----+-----+----+------+
+|   STN|YEAR|MONTH|DATE|   MIN|
++------+----+-----+----+------+
+|896060|2012|   09|  16|-119.6|
++------+----+-----+----+------+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MIN from finalTable where Min in (Select MIN(MIN) from finalTable where Min <>9999.9 and LEFT(YEARMODA,4)='2013') and LEFT(YEARMODA,4) ='2013' ").show()
++------+----+-----+----+------+
+|   STN|YEAR|MONTH|DATE|   MIN|
++------+----+-----+----+------+
+|895770|2013|   07|  31|-115.1|
+|895770|2013|   07|  30|-115.1|
++------+----+-----+----+------+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MIN from finalTable where Min in (Select MIN(MIN) from finalTable where Min <>9999.9 and LEFT(YEARMODA,4)='2014') and LEFT(YEARMODA,4) ='2014' ").show()
++------+----+-----+----+------+
+|   STN|YEAR|MONTH|DATE|   MIN|
++------+----+-----+----+------+
+|896060|2014|   08|  21|-113.4|
++------+----+-----+----+------+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MIN from finalTable where Min in (Select MIN(MIN) from finalTable where Min <>9999.9 and LEFT(YEARMODA,4)='2015') and LEFT(YEARMODA,4) ='2015' ").show()
++------+----+-----+----+------+
+|   STN|YEAR|MONTH|DATE|   MIN|
++------+----+-----+----+------+
+|895770|2015|   09|  17|-114.2|
+|896060|2015|   08|  22|-114.2|
++------+----+-----+----+------+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MIN from finalTable where Min in (Select MIN(MIN) from finalTable where Min <>9999.9 and LEFT(YEARMODA,4)='2016') and LEFT(YEARMODA,4) ='2016' ").show()
++------+----+-----+----+------+
+|   STN|YEAR|MONTH|DATE|   MIN|
++------+----+-----+----+------+
+|896060|2016|   07|  12|-115.1|
++------+----+-----+----+------+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MIN from finalTable where Min in (Select MIN(MIN) from finalTable where Min <>9999.9 and LEFT(YEARMODA,4)='2017') and LEFT(YEARMODA,4) ='2017' ").show()
++------+----+-----+----+------+
+|   STN|YEAR|MONTH|DATE|   MIN|
++------+----+-----+----+------+
+|896250|2017|   06|  20|-116.0|
++------+----+-----+----+------+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MIN from finalTable where Min in (Select MIN(MIN) from finalTable where Min <>9999.9 and LEFT(YEARMODA,4)='2018') and LEFT(YEARMODA,4) ='2018' ").show()
++------+----+-----+----+------+
+|   STN|YEAR|MONTH|DATE|   MIN|
++------+----+-----+----+------+
+|896060|2018|   08|  28|-116.3|
++------+----+-----+----+------+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MIN from finalTable where Min in (Select MIN(MIN) from finalTable where Min <>9999.9 and LEFT(YEARMODA,4)='2019') and LEFT(YEARMODA,4) ='2019' ").show()
++------+----+-----+----+------+
+|   STN|YEAR|MONTH|DATE|   MIN|
++------+----+-----+----+------+
+|896060|2019|   04|  05|-102.1|
++------+----+-----+----+------+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MAX from finalTable where MAX IN(SELECT MAX(MAX) FROM finalTable where MAX <> 9999.9) ").show()
++------+----+-----+----+-----+
+|   STN|YEAR|MONTH|DATE|  MAX|
++------+----+-----+----+-----+
+|720667|2010|   09|  23|132.8|
+|406890|2013|   07|  12|132.8|
+|722577|2012|   07|  12|132.8|
++------+----+-----+----+-----+
+
+>>> spark.sql("SELECT distinct(STN), LEFT(YEARMODA,4) as YEAR, RIGHT(LEFT(YEARMODA,6),2) as MONTH, RIGHT(YEARMODA,2) as DATE, MIN from finalTable where MIN IN(SELECT MIN(MIN) FROM finalTable where MIN <> 9999.9) ").show()
++------+----+-----+----+------+
+|   STN|YEAR|MONTH|DATE|   MIN|
++------+----+-----+----+------+
+|896060|2012|   09|  16|-119.6|
++------+----+-----+----+------+
+
+
+>>> spark.sql("Select STN,RIGHT(YEARMODA,2) as DATE, RIGHT(LEFT(YEARMODA,6),2) as MONTH, LEFT(YEARMODA,4) as YEAR, PRCP  from finalTable where PRCP in (SELECT MAX(PRCP) from finalTable where PRCP <>'99.99')").show()
++------+----+-----+----+-----+
+|   STN|DATE|MONTH|YEAR| PRCP|
++------+----+-----+----+-----+
+|720553|  01|   06|2017|9.99G|
+|485010|  02|   10|2011|9.99G|
+|722351|  05|   12|2016|9.99G|
++------+----+-----+----+-----+
+
+>>> from pyspark.sql.functions import col, split
+>>> cleanDataLast=cleanDataLast.withColumn("PRCP", split(col("PRCP"), "[A-Z]").getItem(0)).withColumn("P1", split(col("PRCP"), "[A-Z]").getItem(1))
+>>> cleanDataLast.createOrReplaceTempView("finalTable")
+Maximum precipitation for 2015
+>>> spark.sql("Select STN,RIGHT(YEARMODA,2) as DATE, RIGHT(LEFT(YEARMODA,6),2) as MONTH, LEFT(YEARMODA,4) as YEAR, PRCP  from finalTable where PRCP in (SELECT MAX(PRCP) from finalTable where PRCP <>'99.99' and LEFT(YEARMODA,4)='2015') and LEFT(YEARMODA,4) ='2015' ").show()
++------+----+-----+----+-----+
+|   STN|DATE|MONTH|YEAR| PRCP|
++------+----+-----+----+-----+
+|915410|  11|   03|2015|19.49|
++------+----+-----+----+-----+
+
+>>> spark.sql("Select STN,RIGHT(YEARMODA,2) as DATE, RIGHT(LEFT(YEARMODA,6),2) as MONTH, LEFT(YEARMODA,4) as YEAR, PRCP  from finalTable where PRCP in (SELECT MIN(PRCP) from finalTable where PRCP <>'99.99' and LEFT(YEARMODA,4)='2015') and LEFT(YEARMODA,4) ='2015' ").show()
++------+----+-----+----+----+
+|   STN|DATE|MONTH|YEAR|PRCP|
++------+----+-----+----+----+
+|725090|  18|   10|2015|0.00|
+|999999|  26|   01|2015|0.00|
+|703210|  08|   09|2015|0.00|
+|726593|  12|   05|2015|0.00|
+|720912|  08|   01|2015|0.00|
+|074380|  13|   02|2015|0.00|
+|161490|  16|   11|2015|0.00|
+|166421|  04|   10|2015|0.00|
+|172650|  24|   12|2015|0.00|
+|243430|  31|   05|2015|0.00|
+|425910|  04|   08|2015|0.00|
+|442880|  22|   09|2015|0.00|
+|476750|  02|   05|2015|0.00|
+|478000|  19|   08|2015|0.00|
+|517090|  19|   03|2015|0.00|
+|539590|  27|   05|2015|0.00|
+|587540|  10|   01|2015|0.00|
+|714400|  21|   05|2015|0.00|
+|941740|  21|   08|2015|0.00|
+|948500|  22|   10|2015|0.00|
++------+----+-----+----+----+
+only showing top 20 rows
+
+>>> missingdf=cleanDataLast.where("STP='9999.9'")
+>>> missingtotal=(float)(missingdf.count())
+>>> total=(float)(cleanDataLast.count())
+>>> percent=(missingtotal*100)/(total)
+>>> print(percent)
+27.961149261
+>>> spark.sql("Select STN,RIGHT(YEARMODA,2)as DATE, RIGHT(LEFT(YEARMODA,6),2) as MONTH,LEFT(YEARMODA,4) as YEAR,GUST from finalTable where GUST in (Select MAX(GUST) from finalTable where GUST <>'999.9' and LEFT(YEARMODA,4)='2019') and LEFT(YEARMODA,4)='2019'").show()
++------+----+-----+----+-----+
+|   STN|DATE|MONTH|YEAR| GUST|
++------+----+-----+----+-----+
+|085510|  06|   01|2019|116.6|
+|085510|  01|   01|2019|116.6|
++------+----+-----+----+-----+
+
